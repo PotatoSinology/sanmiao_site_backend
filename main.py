@@ -8,7 +8,12 @@ app = FastAPI(title="Sanmiao API", version="0.1.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://norbert.huma-num.fr"],
+    allow_origins=["*"],  # Temporary - will restrict after deployment to PLMshift
+    # TODO: After getting PLMshift URL, replace ["*"] with:
+    # allow_origins=[
+    #     "https://norbert.huma-num.fr",
+    #     "https://YOUR-PLMSHIFT-URL.plmshift.math.cnrs.fr",  # Replace with actual URL
+    # ],
     allow_methods=["POST","GET"],
     allow_headers=["*"],
 )
