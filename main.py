@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field, field_validator
-from typing import Optional, Literal
+from typing import Optional, Literal, Union, List
 import sanmiao
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -24,6 +24,7 @@ class ConvertIn(BaseModel):
     year_span_end: int   = Field(..., description="taq")
     output_jdn: bool = Field(False, description="jd_out")
     text: str = Field("", description="user_input string (one or many, separated)")
+    civ: Union[str, List[str]] = Field(default=['c', 'j', 'k'], description="Civilization filter: 'c' (China), 'j' (Japan), 'k' (Korea), or list like ['c', 'j', 'k']")
 
     @field_validator("gregorian_begins")
     @classmethod
@@ -39,6 +40,23 @@ class ConvertIn(BaseModel):
         except ValueError:
             raise ValueError("gregorian_begins must be YYYY-MM-DD (integers)")
         return v
+
+    @field_validator("civ")
+    @classmethod
+    def check_civ(cls, v):
+        if isinstance(v, str):
+            if v not in ['c', 'j', 'k']:
+                raise ValueError("civ must be 'c', 'j', or 'k' when provided as a string")
+            return v
+        elif isinstance(v, list):
+            valid = ['c', 'j', 'k']
+            if not all(item in valid for item in v):
+                raise ValueError("civ list items must be 'c', 'j', or 'k'")
+            if len(v) == 0:
+                raise ValueError("civ list cannot be empty")
+            return v
+        else:
+            raise ValueError("civ must be a string ('c', 'j', 'k') or a list of strings")
 
 class ConvertOut(BaseModel):
     result: str
@@ -58,6 +76,7 @@ def convert_endpoint(payload: ConvertIn):
       gs         = [YYYY,MM,DD] if provided, else None
       tpq        = payload.year_span_start
       taq        = payload.year_span_end
+      civ        = payload.civ (default: ['c', 'j', 'k'])
     """
     # Parse gs
     gs_list = None
@@ -75,6 +94,7 @@ def convert_endpoint(payload: ConvertIn):
             gs=gs_list,
             tpq=payload.year_span_start,
             taq=payload.year_span_end,
+            civ=payload.civ,
         )
     except Exception as e:
         # Return a clear error to the frontend
