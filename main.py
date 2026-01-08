@@ -23,6 +23,7 @@ class ConvertIn(BaseModel):
     year_span_start: int = Field(..., description="tpq")
     year_span_end: int   = Field(..., description="taq")
     output_jdn: bool = Field(False, description="jd_out")
+    sequential: bool = Field(False, description="sequential date strings")
     text: str = Field("", description="user_input string (one or many, separated)")
     civ: Union[str, List[str]] = Field(default=['c', 'j', 'k'], description="Civilization filter: 'c' (China), 'j' (Japan), 'k' (Korea), or list like ['c', 'j', 'k']")
 
@@ -72,6 +73,7 @@ def convert_endpoint(payload: ConvertIn):
       user_input = payload.text
       lang       = payload.lang
       jd_out     = payload.output_jdn
+      sequential = payload.sequential
       pg         = payload.proleptic
       gs         = [YYYY,MM,DD] if provided, else None
       tpq        = payload.year_span_start
@@ -90,6 +92,7 @@ def convert_endpoint(payload: ConvertIn):
             payload.text,
             lang=payload.lang,
             jd_out=payload.output_jdn,
+            sequential=payload.sequential,
             pg=payload.proleptic,
             gs=gs_list,
             tpq=payload.year_span_start,
