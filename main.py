@@ -17,7 +17,7 @@ app.add_middleware(
 )
 
 class ConvertIn(BaseModel):
-    lang: Literal["en","fr"] = "en"
+    lang: Literal["en", "fr", "zh", "ja", "de"] = "en"
     proleptic: bool = Field(..., description="pg")
     gregorian_begins: Optional[str] = Field(None, description="YYYY-MM-DD or null")
     year_span_start: int = Field(..., description="tpq")
